@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  app:
+    build: .
+    depends_on:
+      - app_database
+    environment:
+      POSTGRES_DB: /run/secrets/postgres_db
+      POSTGRES_USER: /run/secrets/postgres_user
+      POSTGRES_PASSWORD: /run/secrets/postgres_password
+    secrets:
+      - postgres_db
+      - postgres_user
+      - postgres_password
+
+  app_database:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    volumes:
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/init.sql
+    secrets:
+      - postgres_db
+      - postgres_user
+      - postgres_password
+
+secrets:
+  postgres_db:
+    file: ./db/postgres_db.txt
+  postgres_user:
+    file: ./db/postgres_user.txt
+  postgres_password:
+    file: ./db/postgres_password.txt
